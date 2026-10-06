@@ -16,10 +16,10 @@ app.use(express.json());
 
     app.get('/items', async (req, res) => await itemInstance.getItems(req, res));
 
-    app.post('/items', itemInstance.createItem);
+    app.post('/items', async (req, res) => await itemInstance.createItem(req, res));
 
-    app.put('/items', itemInstance.updateItem);
-    app.delete('/items', itemInstance.deleteItem);
+    app.put('/items', (req, res) => itemInstance.updateItem(req, res));
+    app.delete('/items', (req, res) => itemInstance.deleteItem(req, res));
 
     app.use((req, res) => {
         res.status(404).send('Not Found');

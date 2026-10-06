@@ -22,31 +22,41 @@ export class Item {
         res.json(data);
     }
 
-    createItem(req, res) {
+    async createItem(req, res) {
         const newItem = req.body;
-        items.push(newItem);
-        res.status(201).json(newItem);
+        const result = await this.store.create(newItem);
+        res.status(201).json(result);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 
-    updateItem(req, res) {
-        const updatedItem = req.body;
-        const index = items.findIndex(item => item.id === updatedItem.id);
-        if (index !== -1) {
-            items[index] = updatedItem;
-            res.json(updatedItem);
-        } else {
-            res.status(404).send('Item not found');
+    async updateItem(req, res) {
+        try {                                                                                      
+            const { id, ...data } = req.body; // ดึง id และข้อมูลที่จะอัปเดต                             
+            const result = await this.store.update(id, data);                                      
+                                                                                                       
+            if (result.matchedCount > 0) {                                                         
+                res.json({ message: 'Item updated successfully', id, ...data });                   
+            } else {                                                                               
+                res.status(404).send('Item not found');                                            
+            }                                                                                      
+        } catch (err) {                                                                            
+            res.status(500).json({ error: err.message });                                          
         }
     }
 
-    deleteItem(req, res) {
-        const { id } = req.body;
-        const index = items.findIndex(item => item.id === id);
-        if (index !== -1) {
-            const deletedItem = items.splice(index, 1);
-            res.json(deletedItem);
-        } else {
-            res.status(404).send('Item not found');
+    async deleteItem(req, res) {
+        try {                                                                                      
+            const { id } = req.body;                                                               
+            const result = await this.store.delete(id);                                            
+                                                                                                       
+            if (result.deletedCount > 0) {                                                         
+                res.json({ message: 'Item deleted successfully', id });                            
+            } else {                                                                               
+                res.status(404).send('Item not found');                                            
+            }                                                                                      
+        } catch (err) {                                                                            
+            res.status(500).json({ error: err.message });                                          
         }
     }
 }

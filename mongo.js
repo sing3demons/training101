@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb'
 
 
 export async function connectDB() {
-    const url = 'mongodb://localhost:27017';
+    const url = Process.env;
     const client = new MongoClient(url);
 
     // Database Name
