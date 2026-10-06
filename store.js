@@ -11,5 +11,9 @@ export class Store {
         const data = await this.collection.find({})
         return data.toArray()
     }
+
+    async delete(id) {
+        await this.collection.deleteOne({ _id: new ObjectId(id) });
+    }
 }
 
