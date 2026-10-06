@@ -1,7 +1,7 @@
 import { Collection, Db, ObjectId } from 'mongodb'
 
 export interface IStore {
-    find(): Promise<any>
+    find(filter: any): Promise<any>
     update(filter: any, update: any): Promise<any>
     delete(id: string): Promise<any>
     create(data: any): Promise<any>
@@ -17,7 +17,7 @@ export class Store implements IStore {
         this.collection = collection
     }
 
-    async find() {
+    async find(filter: any) {
         const data = this.collection.find({})
         return await data.toArray()
     }
