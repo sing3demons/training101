@@ -11,5 +11,9 @@ export class Store {
         const data = await this.collection.find({})
         return data.toArray()
     }
+    async update(filter, update) {
+        const data = await this.collection.updateOne(filter, { $set: update })
+        return data
+    }
 }
 
