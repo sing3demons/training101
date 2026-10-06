@@ -19,5 +19,11 @@ export class Store {
     async delete(id) {
         await this.collection.deleteOne({ _id: new ObjectId(id) });
     }
+
+    async create(data) {                                                                           
+        const result = await this.collection.insertOne(data);                                      
+        return { ...data, _id: result.insertedId };                                                
+    }
+    
 }
 
