@@ -13,6 +13,7 @@ export function createUsersRouter(db: Db): Router {
 
   const router = Router()
   router.post('/', handler.create)
+  router.get('/:id', handler.getById)
 
   return router
 }
