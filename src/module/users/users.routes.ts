@@ -6,10 +6,13 @@ import { UserHandler } from './users.handler'
 
 // รับสิ่งที่ router ต้องใช้เข้ามาทาง parameter แล้วส่งมาจาก app.ts
 // path ข้างในเริ่มจาก '/' เพราะ mount ไว้ที่ /users แล้ว
-export function createUsersRouter(db: Db): Router {
+export function createUserService(db: Db) {
   const store = new MongoUserStore(db) 
-  const service = new UserService(store)
-  const handler = new UserHandler(service)
+  return new UserService(store)
+}
+
+export function createUsersRouter(userService: UserService): Router {
+  const handler = new UserHandler(userService)
 
   const router = Router()
   router.post('/', handler.create)
