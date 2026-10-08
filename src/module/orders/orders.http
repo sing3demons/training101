@@ -1,0 +1,164 @@
+# ทดสอบ Orders (คนที่ 3)
+# วิธีใช้: VS Code + extension "REST Client" → กด "Send Request" ทีละอัน จากบนลงล่าง
+# บรรทัด "# expect:" คือผลที่ต้องได้ ถ้าไม่ตรง = ยังไม่ผ่าน
+# ต้องใช้ POST /users และ POST /products ของเพื่อนได้ก่อน (หรือ insert ข้อมูลเองด้วย mongosh แล้วแก้ id ในไฟล์นี้)
+
+@baseUrl = http://localhost:3000
+
+### ============ เตรียมข้อมูล ============
+
+### 0.1 สร้าง user
+# @name user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Order Tester",
+  "email": "order.{{$timestamp}}@mail.com"
+}
+
+### 0.2 สร้างสินค้า stock 3 ชิ้น ราคา 1,590.00 บาท
+# @name product
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Keyboard",
+  "price": 159000,
+  "stock": 3,
+  "category": "gadget"
+}
+
+### ============ POST /orders ============
+
+### 1. สั่ง 2 ชิ้นสำเร็จ
+# expect: 201 · total = 318000 · product = { _id, name: "Keyboard", price: 159000 } · status = "placed"
+# @name order
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 2
+}
+
+### 2. เช็ค stock หลังสั่ง
+# expect: 200 · stock = 1
+GET {{baseUrl}}/products/{{product.response.body.data._id}}
+
+### 3. client แอบส่ง price / total มาเอง
+# expect: 201 · total = 159000 (คำนวณจากราคาจริง ไม่ใช่ 1) · หลังข้อนี้ stock = 0
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 1,
+  "price": 1,
+  "total": 1
+}
+
+### 4. สั่งเกิน stock (เหลือ 0)
+# expect: 409
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 1
+}
+
+### 5. เช็คว่า stock ไม่ติดลบ
+# expect: 200 · stock = 0
+GET {{baseUrl}}/products/{{product.response.body.data._id}}
+
+### 6. user ไม่มีอยู่จริง
+# expect: 404
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "000000000000000000000000",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 1
+}
+
+### 7. product ไม่มีอยู่จริง
+# expect: 404
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "000000000000000000000000",
+  "qty": 1
+}
+
+### 8. userId ผิดรูปแบบ
+# expect: 400
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "abc",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 1
+}
+
+### 9. qty = 0
+# expect: 400
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 0
+}
+
+### 10. qty เป็นทศนิยม
+# expect: 400
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 1.5
+}
+
+### 11. ไม่มี productId
+# expect: 400
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "qty": 1
+}
+
+### ============ GET /orders/:id ============
+
+### 12. ดู order จากข้อ 1
+# expect: 200 · ข้อมูลตรงกับข้อ 1
+GET {{baseUrl}}/orders/{{order.response.body.data._id}}
+
+### 13. id ถูกรูปแบบแต่ไม่มีอยู่จริง
+# expect: 404
+GET {{baseUrl}}/orders/000000000000000000000000
+
+### 14. id ผิดรูปแบบ
+# expect: 400 (ห้ามเป็น 500)
+GET {{baseUrl}}/orders/abc
+
+### ============ ราคาใน order ต้องไม่เปลี่ยนตามสินค้า ============
+# 15. เปลี่ยนราคาสินค้าใน DB โดยตรง (ยังไม่มี endpoint แก้ราคา):
+#     docker compose exec mongo mongosh mini_shop --eval 'db.products.updateMany({ name: "Keyboard" }, { $set: { price: 999900 } })'
+# แล้วยิงข้อ 16
+
+### 16. ดู order จากข้อ 1 อีกครั้ง
+# expect: 200 · product.price ยังเป็น 159000 · total ยังเป็น 318000
+GET {{baseUrl}}/orders/{{order.response.body.data._id}}

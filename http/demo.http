@@ -1,0 +1,79 @@
+# Demo flow ของทีม
+# รันจากบนลงล่างต่อเนื่อง ทุกข้อต้องได้ผลตาม "# expect:"
+
+@baseUrl = http://localhost:3000
+
+### 1. สร้างลูกค้า
+# expect: 201
+# @name user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Demo Customer",
+  "email": "Demo.{{$timestamp}}@Mail.com"
+}
+
+### 2. สมัครซ้ำด้วย email เดิม
+# expect: 409
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Demo Customer Again",
+  "email": "{{user.response.body.data.email}}"
+}
+
+### 3. เพิ่มสินค้า stock 3 ชิ้น
+# expect: 201
+# @name product
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Mechanical Keyboard",
+  "price": 159000,
+  "stock": 3,
+  "category": "Gadget"
+}
+
+### 4. ค้นหาสินค้าหมวด gadget
+# expect: 200 · เจอ Mechanical Keyboard
+GET {{baseUrl}}/products?category=gadget
+
+### 5. สั่ง 2 ชิ้น
+# expect: 201 · total = 318000
+# @name order
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 2
+}
+
+### 6. stock ลดลง
+# expect: stock = 1
+GET {{baseUrl}}/products/{{product.response.body.data._id}}
+
+### 7. สั่งอีก 2 ชิ้น (เกิน stock)
+# expect: 409
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "userId": "{{user.response.body.data._id}}",
+  "productId": "{{product.response.body.data._id}}",
+  "qty": 2
+}
+
+### 8. stock ยังเหลือ 1 (ไม่ถูกตัดจากข้อ 7)
+# expect: stock = 1
+GET {{baseUrl}}/products/{{product.response.body.data._id}}
+
+### 9. ดู order
+# expect: 200 · product.price = 159000
+GET {{baseUrl}}/orders/{{order.response.body.data._id}}
+
+# 10. สั่งพร้อมกัน: รัน "npm run test:race" ใน terminal แล้วอธิบายผล

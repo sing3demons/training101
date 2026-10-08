@@ -1,0 +1,124 @@
+# ทดสอบ Products (คนที่ 2)
+# วิธีใช้: VS Code + extension "REST Client" → กด "Send Request" ทีละอัน จากบนลงล่าง
+# บรรทัด "# expect:" คือผลที่ต้องได้ ถ้าไม่ตรง = ยังไม่ผ่าน
+# ราคาเป็นหน่วยสตางค์: 159000 = 1,590.00 บาท
+
+@baseUrl = http://localhost:3000
+
+### ============ POST /products ============
+
+### 1. เพิ่มสินค้าสำเร็จ (category ตัวพิมพ์ปน)
+# expect: 201 · มี _id, name, price, stock, category, createdAt
+# @name createKeyboard
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Keyboard",
+  "price": 159000,
+  "stock": 5,
+  "category": "Gadget"
+}
+
+### 2. เพิ่มสินค้าอีกหมวด
+# expect: 201
+# @name createBook
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "TypeScript Book",
+  "price": 45000,
+  "stock": 10,
+  "category": "book"
+}
+
+### 3. สินค้าราคา 0 และ stock 0 (ทำได้)
+# expect: 201
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Free Sticker",
+  "price": 0,
+  "stock": 0,
+  "category": "gadget"
+}
+
+### 4. price ติดลบ
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "Bad", "price": -1, "stock": 1, "category": "gadget" }
+
+### 5. price เป็นทศนิยม (ต้องเป็นสตางค์ จำนวนเต็ม)
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "Bad", "price": 199.5, "stock": 1, "category": "gadget" }
+
+### 6. stock ติดลบ
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "Bad", "price": 100, "stock": -5, "category": "gadget" }
+
+### 7. stock เป็น string
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "Bad", "price": 100, "stock": "5", "category": "gadget" }
+
+### 8. ไม่มี category
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "Bad", "price": 100, "stock": 1 }
+
+### 9. name ว่าง
+# expect: 400
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{ "name": "", "price": 100, "stock": 1, "category": "gadget" }
+
+### ============ GET /products ============
+
+### 10. ดูสินค้าทั้งหมด
+# expect: 200 · data เป็น array
+GET {{baseUrl}}/products
+
+### 11. กรองตาม category
+# expect: 200 · มีแต่สินค้าหมวด gadget (รวม Keyboard ที่สร้างด้วย "Gadget") · ไม่มี TypeScript Book
+GET {{baseUrl}}/products?category=gadget
+
+### 12. กรองด้วยตัวพิมพ์ใหญ่
+# expect: 200 · ผลเหมือนข้อ 11
+GET {{baseUrl}}/products?category=GADGET
+
+### 13. category ที่ไม่มี
+# expect: 200 · data เป็น array ว่าง []
+GET {{baseUrl}}/products?category=no-such-category
+
+### 14. NoSQL injection
+# expect: 400 หรือ array ว่าง · ห้ามได้สินค้าทั้งร้านกลับมา
+GET {{baseUrl}}/products?category[$ne]=x
+
+### ============ GET /products/:id ============
+
+### 15. ดูสินค้าจากข้อ 1
+# expect: 200
+GET {{baseUrl}}/products/{{createKeyboard.response.body.data._id}}
+
+### 16. id ถูกรูปแบบแต่ไม่มีอยู่จริง
+# expect: 404
+GET {{baseUrl}}/products/000000000000000000000000
+
+### 17. id ผิดรูปแบบ
+# expect: 400 (ห้ามเป็น 500)
+GET {{baseUrl}}/products/abc

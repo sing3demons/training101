@@ -1,0 +1,37 @@
+# ตัวอย่าง module example (notes) — ดู src/module/example/README.md
+
+@baseUrl = http://localhost:3000
+
+### สร้าง note
+# expect: 201
+# @name note
+POST {{baseUrl}}/examples
+Content-Type: application/json
+
+{
+  "title": "Hello",
+  "content": "Dependency Injection example"
+}
+
+### ดูทั้งหมด
+# expect: 200
+GET {{baseUrl}}/examples
+
+### ดู note ที่สร้าง
+# expect: 200
+GET {{baseUrl}}/examples/{{note.response.body.data._id}}
+
+### ไม่มี title
+# expect: 400
+POST {{baseUrl}}/examples
+Content-Type: application/json
+
+{ "content": "no title" }
+
+### id ไม่มีอยู่จริง
+# expect: 404
+GET {{baseUrl}}/examples/000000000000000000000000
+
+### id ผิดรูปแบบ
+# expect: 400
+GET {{baseUrl}}/examples/abc

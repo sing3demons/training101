@@ -1,0 +1,98 @@
+# ทดสอบ Users (คนที่ 1)
+# วิธีใช้: VS Code + extension "REST Client" → กด "Send Request" ทีละอัน จากบนลงล่าง
+# บรรทัด "# expect:" คือผลที่ต้องได้ ถ้าไม่ตรง = ยังไม่ผ่าน
+
+@baseUrl = http://localhost:3000
+
+### ============ POST /users ============
+
+### 1. สมัครสำเร็จ (email ตัวพิมพ์ปนกัน)
+# expect: 201 · email ใน response เป็นตัวพิมพ์เล็กทั้งหมด · มี _id, name, email, createdAt
+# @name createUser
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Somchai",
+  "email": "Somchai.{{$timestamp}}@Mail.com"
+}
+
+### 2. email ซ้ำ (ใช้ email จากข้อ 1 ซึ่งเป็นตัวพิมพ์เล็ก → ต้องนับว่าซ้ำกับที่สมัครด้วยตัวพิมพ์ปน)
+# expect: 409
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Somchai Copy",
+  "email": "{{createUser.response.body.data.email}}"
+}
+
+### 3. ไม่มี name
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "email": "noname.{{$timestamp}}@mail.com"
+}
+
+### 4. name เป็นช่องว่าง
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "   ",
+  "email": "blank.{{$timestamp}}@mail.com"
+}
+
+### 5. name ยาวเกิน 100 ตัวอักษร (101 ตัว)
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "email": "long.{{$timestamp}}@mail.com"
+}
+
+### 6. email ผิดรูปแบบ
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Bad Email",
+  "email": "not-an-email"
+}
+
+### 7. email ไม่ใช่ string
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Object Email",
+  "email": { "$gt": "" }
+}
+
+### 8. body ไม่ใช่ JSON ที่ถูกต้อง
+# expect: 400
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{ "name": "Broken",
+
+### ============ GET /users/:id ============
+
+### 9. ดู user ที่สร้างในข้อ 1
+# expect: 200 · ข้อมูลตรงกับข้อ 1
+GET {{baseUrl}}/users/{{createUser.response.body.data._id}}
+
+### 10. id ถูกรูปแบบแต่ไม่มีอยู่จริง
+# expect: 404
+GET {{baseUrl}}/users/000000000000000000000000
+
+### 11. id ผิดรูปแบบ
+# expect: 400 (ห้ามเป็น 500)
+GET {{baseUrl}}/users/abc
