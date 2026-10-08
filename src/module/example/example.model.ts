@@ -1,11 +1,9 @@
-import type { ObjectId } from 'mongodb'
-
-// หน้าตา document ใน collection `notes`
+// model ของระบบ — ไม่ผูกกับ database ใด ๆ (ไม่มี ObjectId / ไม่ import mongodb)
 export interface Note {
-  _id: ObjectId
+  id: string
   title: string
   content: string
   createdAt: Date
 }
 
-export type NewNote = Omit<Note, '_id'>
+export type NewNote = Omit<Note, 'id'>

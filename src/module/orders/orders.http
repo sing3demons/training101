@@ -32,20 +32,20 @@ Content-Type: application/json
 ### ============ POST /orders ============
 
 ### 1. สั่ง 2 ชิ้นสำเร็จ
-# expect: 201 · total = 318000 · product = { _id, name: "Keyboard", price: 159000 } · status = "placed"
+# expect: 201 · total = 318000 · product = { id, name: "Keyboard", price: 159000 } · status = "placed"
 # @name order
 POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 2
 }
 
 ### 2. เช็ค stock หลังสั่ง
 # expect: 200 · stock = 1
-GET {{baseUrl}}/products/{{product.response.body.data._id}}
+GET {{baseUrl}}/products/{{product.response.body.data.id}}
 
 ### 3. client แอบส่ง price / total มาเอง
 # expect: 201 · total = 159000 (คำนวณจากราคาจริง ไม่ใช่ 1) · หลังข้อนี้ stock = 0
@@ -53,8 +53,8 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 1,
   "price": 1,
   "total": 1
@@ -66,14 +66,14 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 1
 }
 
 ### 5. เช็คว่า stock ไม่ติดลบ
 # expect: 200 · stock = 0
-GET {{baseUrl}}/products/{{product.response.body.data._id}}
+GET {{baseUrl}}/products/{{product.response.body.data.id}}
 
 ### 6. user ไม่มีอยู่จริง
 # expect: 404
@@ -82,7 +82,7 @@ Content-Type: application/json
 
 {
   "userId": "000000000000000000000000",
-  "productId": "{{product.response.body.data._id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 1
 }
 
@@ -92,7 +92,7 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
   "productId": "000000000000000000000000",
   "qty": 1
 }
@@ -104,7 +104,7 @@ Content-Type: application/json
 
 {
   "userId": "abc",
-  "productId": "{{product.response.body.data._id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 1
 }
 
@@ -114,8 +114,8 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 0
 }
 
@@ -125,8 +125,8 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 1.5
 }
 
@@ -136,7 +136,7 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
   "qty": 1
 }
 
@@ -144,7 +144,7 @@ Content-Type: application/json
 
 ### 12. ดู order จากข้อ 1
 # expect: 200 · ข้อมูลตรงกับข้อ 1
-GET {{baseUrl}}/orders/{{order.response.body.data._id}}
+GET {{baseUrl}}/orders/{{order.response.body.data.id}}
 
 ### 13. id ถูกรูปแบบแต่ไม่มีอยู่จริง
 # expect: 404
@@ -161,4 +161,4 @@ GET {{baseUrl}}/orders/abc
 
 ### 16. ดู order จากข้อ 1 อีกครั้ง
 # expect: 200 · product.price ยังเป็น 159000 · total ยังเป็น 318000
-GET {{baseUrl}}/orders/{{order.response.body.data._id}}
+GET {{baseUrl}}/orders/{{order.response.body.data.id}}

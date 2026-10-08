@@ -7,7 +7,7 @@
 ### ============ POST /users ============
 
 ### 1. สมัครสำเร็จ (email ตัวพิมพ์ปนกัน)
-# expect: 201 · email ใน response เป็นตัวพิมพ์เล็กทั้งหมด · มี _id, name, email, createdAt
+# expect: 201 · email ใน response เป็นตัวพิมพ์เล็กทั้งหมด · มี id, name, email, createdAt
 # @name createUser
 POST {{baseUrl}}/users
 Content-Type: application/json
@@ -87,7 +87,7 @@ Content-Type: application/json
 
 ### 9. ดู user ที่สร้างในข้อ 1
 # expect: 200 · ข้อมูลตรงกับข้อ 1
-GET {{baseUrl}}/users/{{createUser.response.body.data._id}}
+GET {{baseUrl}}/users/{{createUser.response.body.data.id}}
 
 ### 10. id ถูกรูปแบบแต่ไม่มีอยู่จริง
 # expect: 404

@@ -48,14 +48,14 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 2
 }
 
 ### 6. stock ลดลง
 # expect: stock = 1
-GET {{baseUrl}}/products/{{product.response.body.data._id}}
+GET {{baseUrl}}/products/{{product.response.body.data.id}}
 
 ### 7. สั่งอีก 2 ชิ้น (เกิน stock)
 # expect: 409
@@ -63,17 +63,17 @@ POST {{baseUrl}}/orders
 Content-Type: application/json
 
 {
-  "userId": "{{user.response.body.data._id}}",
-  "productId": "{{product.response.body.data._id}}",
+  "userId": "{{user.response.body.data.id}}",
+  "productId": "{{product.response.body.data.id}}",
   "qty": 2
 }
 
 ### 8. stock ยังเหลือ 1 (ไม่ถูกตัดจากข้อ 7)
 # expect: stock = 1
-GET {{baseUrl}}/products/{{product.response.body.data._id}}
+GET {{baseUrl}}/products/{{product.response.body.data.id}}
 
 ### 9. ดู order
 # expect: 200 · product.price = 159000
-GET {{baseUrl}}/orders/{{order.response.body.data._id}}
+GET {{baseUrl}}/orders/{{order.response.body.data.id}}
 
 # 10. สั่งพร้อมกัน: รัน "npm run test:race" ใน terminal แล้วอธิบายผล

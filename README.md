@@ -42,11 +42,11 @@ src/
     errors.ts             # BadRequestError (400), NotFoundError (404), ConflictError (409)
     error-handler.ts      # แปลง error ที่ throw เป็น HTTP response
   module/
-    users/                # คนที่ 1 — โจทย์อยู่ใน README.md ของโฟลเดอร์
+    users/                # คนที่ 1 — โจทย์ใน README.md · ทดสอบ API ด้วย users.http
     products/             # คนที่ 2
     orders/               # คนที่ 3
     example/              # ตัวอย่าง module ที่ทำงานได้จริง (notes) — ดูวิธีแบ่ง layer และทำ DI
-http/                     # ไฟล์ทดสอบ API (ดูหัวข้อ "ทดสอบ API")
+http/demo.http            # flow รวมของทีมตอน demo
 scripts/race-test.ts      # ทดสอบสั่งซื้อพร้อมกัน
 ```
 
@@ -73,16 +73,16 @@ app.ts:     app.use('/users', createUsersRouter(db)) ...
 
 ## ทดสอบ API
 
-ติดตั้ง VS Code extension **REST Client** แล้วเปิดไฟล์ในโฟลเดอร์ `http/` กด **Send Request** ทีละอันจากบนลงล่าง
+ติดตั้ง VS Code extension **REST Client** แล้วเปิดไฟล์ `.http` กด **Send Request** ทีละอันจากบนลงล่าง
 แต่ละ request มีบรรทัด `# expect:` บอกผลที่ต้องได้ ถ้าไม่ตรงแปลว่ายังไม่ผ่าน
 
 | ไฟล์ | ใช้ทดสอบ |
 |---|---|
-| `http/users.http` | คนที่ 1 |
-| `http/products.http` | คนที่ 2 |
-| `http/orders.http` | คนที่ 3 (สร้าง user / product เองตอนต้นไฟล์) |
+| `src/module/users/users.http` | คนที่ 1 |
+| `src/module/products/products.http` | คนที่ 2 |
+| `src/module/orders/orders.http` | คนที่ 3 (สร้าง user / product เองตอนต้นไฟล์) |
+| `src/module/example/example.http` | module ตัวอย่าง |
 | `http/demo.http` | flow รวมของทีมตอน demo |
-| `http/example.http` | module ตัวอย่าง |
 
 ถ้าเพิ่ม endpoint หรือ test case ใหม่ ให้เพิ่มลงในไฟล์ของตัวเองด้วย
 
@@ -90,7 +90,7 @@ app.ts:     app.use('/users', createUsersRouter(db)) ...
 
 **Response สำเร็จ**
 ```json
-{ "data": { "_id": "...", "name": "..." } }
+{ "data": { "id": "...", "name": "..." } }
 ```
 
 **Response error** ไม่ต้องเขียนเอง แค่ `throw` error จาก `src/shared/errors.ts` แล้ว error handler จะตอบให้

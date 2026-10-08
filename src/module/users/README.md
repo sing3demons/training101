@@ -10,6 +10,8 @@
 
 ## Data model — collection `users`
 
+> ใน MongoDB เก็บเป็น `_id: ObjectId` แต่ model ในโค้ดและ response ใช้ **`id: string`** — แปลงกันใน repository (ดู [ตัวอย่าง](../example/README.md))
+
 | field | type | กฎ |
 |---|---|---|
 | `_id` | ObjectId | |
@@ -29,7 +31,7 @@ POST /users
 { "name": "Somchai", "email": "Somchai@Mail.com" }
 
 → 201
-{ "data": { "_id": "665f...", "name": "Somchai", "email": "somchai@mail.com", "createdAt": "..." } }
+{ "data": { "id": "665f...", "name": "Somchai", "email": "somchai@mail.com", "createdAt": "..." } }
 ```
 
 ### ⚠️ ต้องคิดให้ดี
@@ -55,7 +57,7 @@ merge แล้วบอกเพื่อนคนที่ 3
 ## กติกาของทีม (เหมือนกันทุกคน)
 
 - merge เข้า `main` ผ่าน **Pull Request ที่เพื่อน review แล้ว** เท่านั้น · คุณต้องมี PR ที่ merge แล้วอย่างน้อย 2 PR
-- ทดสอบด้วยไฟล์ในโฟลเดอร์ `http/` ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
+- ทดสอบด้วย `users.http` ในโฟลเดอร์นี้ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
 - ติดปัญหา: หาทางเอง → ถามเพื่อน → ถ้าติดเกิน 20 นาทีค่อยเรียกพี่ · ใช้ AI ได้ **แต่ต้องอธิบายโค้ดที่ส่งได้ทุกบรรทัด**
 
 **Demo ส่วนของคุณ:** สมัครสำเร็จ → สมัครด้วย email เดิม (เปลี่ยนตัวพิมพ์เล็ก/ใหญ่) แล้วโดนปฏิเสธ → อธิบายว่าระบบกันการสมัครพร้อมกันได้ยังไง

@@ -13,6 +13,8 @@
 
 ## Data model — collection `products`
 
+> ใน MongoDB เก็บเป็น `_id: ObjectId` แต่ model ในโค้ดและ response ใช้ **`id: string`** — แปลงกันใน repository (ดู [ตัวอย่าง](../example/README.md))
+
 | field | type | กฎ |
 |---|---|---|
 | `_id` | ObjectId | |
@@ -35,14 +37,14 @@ POST /products
 { "name": "Keyboard", "price": 159000, "stock": 5, "category": "gadget" }
 
 → 201
-{ "data": { "_id": "665f...", "name": "Keyboard", "price": 159000, "stock": 5, "category": "gadget", "createdAt": "..." } }
+{ "data": { "id": "665f...", "name": "Keyboard", "price": 159000, "stock": 5, "category": "gadget", "createdAt": "..." } }
 ```
 
 ```http
 GET /products?category=gadget
 
 → 200
-{ "data": [ { "_id": "...", "name": "Keyboard", ... } ] }
+{ "data": [ { "id": "...", "name": "Keyboard", ... } ] }
 ```
 
 ### ⚠️ ต้องคิดให้ดี
@@ -80,7 +82,7 @@ merge แล้วบอกเพื่อนคนที่ 3 ทันที
 ## กติกาของทีม (เหมือนกันทุกคน)
 
 - merge เข้า `main` ผ่าน **Pull Request ที่เพื่อน review แล้ว** เท่านั้น · คุณต้องมี PR ที่ merge แล้วอย่างน้อย 2 PR
-- ทดสอบด้วยไฟล์ในโฟลเดอร์ `http/` ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
+- ทดสอบด้วย `products.http` ในโฟลเดอร์นี้ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
 - ติดปัญหา: หาทางเอง → ถามเพื่อน → ถ้าติดเกิน 20 นาทีค่อยเรียกพี่ · ใช้ AI ได้ **แต่ต้องอธิบายโค้ดที่ส่งได้ทุกบรรทัด**
 
 **Demo ส่วนของคุณ:** เพิ่มสินค้า → กรองตาม category → อธิบายว่า `decreaseStock` กันการตัด stock พร้อมกันได้ยังไง

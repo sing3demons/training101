@@ -8,7 +8,7 @@
 ### ============ POST /products ============
 
 ### 1. เพิ่มสินค้าสำเร็จ (category ตัวพิมพ์ปน)
-# expect: 201 · มี _id, name, price, stock, category, createdAt
+# expect: 201 · มี id, name, price, stock, category, createdAt
 # @name createKeyboard
 POST {{baseUrl}}/products
 Content-Type: application/json
@@ -113,7 +113,7 @@ GET {{baseUrl}}/products?category[$ne]=x
 
 ### 15. ดูสินค้าจากข้อ 1
 # expect: 200
-GET {{baseUrl}}/products/{{createKeyboard.response.body.data._id}}
+GET {{baseUrl}}/products/{{createKeyboard.response.body.data.id}}
 
 ### 16. id ถูกรูปแบบแต่ไม่มีอยู่จริง
 # expect: 404

@@ -1,10 +1,9 @@
-import { ObjectId } from 'mongodb'
-import { BadRequestError, NotFoundError } from '../../shared/errors'
+import { NotFoundError } from '../../shared/errors'
 import type { Note } from './example.model'
 import type { NoteStore } from './example.repository'
 
-// logic ของ notes — รับ NoteStore เข้ามาทาง constructor
-// ตอน test ส่งตัวปลอมที่ implements NoteStore เข้ามาแทน MongoDB ได้เลย
+// logic ของ notes — รับ NoteStore เข้ามาทาง constructor และไม่รู้ว่าข้างหลังเป็น database อะไร
+// ตอน test ส่งตัวปลอมที่ implements NoteStore เข้ามาแทนได้เลย
 export class NoteService {
   constructor(private readonly store: NoteStore) {}
 
@@ -13,9 +12,7 @@ export class NoteService {
   }
 
   async getById(id: string): Promise<Note> {
-    if (!ObjectId.isValid(id)) throw new BadRequestError('invalid id')
-
-    const note = await this.store.findById(new ObjectId(id))
+    const note = await this.store.findById(id)
     if (!note) throw new NotFoundError('note not found')
     return note
   }

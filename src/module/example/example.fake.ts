@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb'
+import { randomUUID } from 'node:crypto'
 import type { NewNote, Note } from './example.model'
 import type { NoteStore } from './example.repository'
 
@@ -8,13 +8,13 @@ export class InMemoryNoteStore implements NoteStore {
   private readonly notes: Note[] = []
 
   async insert(note: NewNote): Promise<Note> {
-    const saved = { _id: new ObjectId(), ...note }
+    const saved = { id: randomUUID(), ...note }
     this.notes.push(saved)
     return saved
   }
 
-  async findById(id: ObjectId): Promise<Note | null> {
-    return this.notes.find((note) => note._id.equals(id)) ?? null
+  async findById(id: string): Promise<Note | null> {
+    return this.notes.find((note) => note.id === id) ?? null
   }
 
   async findAll(): Promise<Note[]> {

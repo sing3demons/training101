@@ -19,7 +19,7 @@ GET {{baseUrl}}/examples
 
 ### ดู note ที่สร้าง
 # expect: 200
-GET {{baseUrl}}/examples/{{note.response.body.data._id}}
+GET {{baseUrl}}/examples/{{note.response.body.data.id}}
 
 ### ไม่มี title
 # expect: 400

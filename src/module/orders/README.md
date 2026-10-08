@@ -24,11 +24,13 @@
 
 ## Data model — collection `orders`
 
+> ใน MongoDB เก็บเป็น `_id: ObjectId` แต่ model ในโค้ดและ response ใช้ **`id: string`** — แปลงกันใน repository (ดู [ตัวอย่าง](../example/README.md))
+
 | field | type | กฎ |
 |---|---|---|
 | `_id` | ObjectId | |
 | `userId` | ObjectId | ต้องเป็น user ที่มีอยู่จริง |
-| `product` | object | `{ _id, name, price }` — **ข้อมูลสินค้า ณ ตอนที่สั่ง** |
+| `product` | object | `{ _id, name, price }` — **ข้อมูลสินค้า ณ ตอนที่สั่ง** (ใน response เป็น `{ id, name, price }`) |
 | `qty` | number | จำนวนเต็ม > 0 |
 | `total` | number | `product.price × qty` (หน่วยสตางค์) — **คำนวณฝั่ง server** |
 | `status` | string | `"placed"` |
@@ -49,9 +51,9 @@ POST /orders
 
 → 201
 { "data": {
-    "_id": "6671...",
+    "id": "6671...",
     "userId": "665f...",
-    "product": { "_id": "6660...", "name": "Keyboard", "price": 159000 },
+    "product": { "id": "6660...", "name": "Keyboard", "price": 159000 },
     "qty": 2,
     "total": 318000,
     "status": "placed",
@@ -76,7 +78,7 @@ POST /orders
 ## กติกาของทีม (เหมือนกันทุกคน)
 
 - merge เข้า `main` ผ่าน **Pull Request ที่เพื่อน review แล้ว** เท่านั้น · คุณต้องมี PR ที่ merge แล้วอย่างน้อย 2 PR
-- ทดสอบด้วยไฟล์ในโฟลเดอร์ `http/` ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
+- ทดสอบด้วย `orders.http` ในโฟลเดอร์นี้ให้ผ่านทุกข้อก่อนเปิด PR (ดูวิธีใน [README หลัก](../../../README.md)) · เพิ่ม endpoint ใหม่ต้องเพิ่ม test case ด้วย
 - ติดปัญหา: หาทางเอง → ถามเพื่อน → ถ้าติดเกิน 20 นาทีค่อยเรียกพี่ · ใช้ AI ได้ **แต่ต้องอธิบายโค้ดที่ส่งได้ทุกบรรทัด**
 
 **Demo ส่วนของคุณ (เป็นคนรัน flow รวมของทีม):**

@@ -7,7 +7,7 @@ import { NoteService } from './example.service'
 // ประกอบ dependency ของ module ที่นี่: db → store → service → handler → router
 // มีแค่ที่นี่ที่ใช้ `new` — class อื่นรับของที่ต้องใช้ผ่าน constructor อย่างเดียว
 export function createExampleRouter(db: Db): Router {
-  const store = new MongoNoteStore(db.collection('notes'))
+  const store = new MongoNoteStore(db)
   const service = new NoteService(store)
   const handler = new NoteHandler(service)
 
