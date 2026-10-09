@@ -67,7 +67,10 @@ export class MongoOrderStore implements OrderStore {
         return doc ? toOrder(doc) : null
     }
     async findAll(): Promise<Order[]> {
-        const docs = await this.collection.find().toArray()
+        const docs = await this.collection
+        .find()
+        .sort({ createdAt: -1})
+        .toArray()
         return docs.map(toOrder)
     }
 }

@@ -2,12 +2,14 @@ import express from 'express'
 import type { Db } from 'mongodb'
 import { ObjectId } from 'mongodb'
 import { errorHandler, notFoundHandler } from './shared/error-handler'
-import { BadRequestError, ConflictError, NotFoundError } from './shared/errors'
+import { NotFoundError } from './shared/errors'
 import { createUsersRouter } from './module/users/users.routes'
 import { createProductsRouter } from './module/products/products.routes'
 import { createOrdersRouter } from './module/orders/orders.routes'
 import { createExampleRouter } from './module/example/example.routes'
 import type { ProductCatalog, UserLookup } from './module/orders/orders.model'
+import { MongoProductStore } from './module/products/products.repository'
+import { ProductService } from './module/products/products.service'
 
 // รับ db เข้ามา → ตอนเขียน test ส่ง db ทดสอบเข้ามาแทนได้
 export function createApp(db: Db) {
@@ -19,32 +21,48 @@ export function createApp(db: Db) {
     res.json({ status: 'ok' })
   })
 
-  const mockUserLookup: UserLookup = {
+  const userLookup: UserLookup = {
     async getUserById(id: string) {
-      if (!ObjectId.isValid(id)) throw new BadRequestError('invalid user id')
-      if (id === '000000000000000000000001') throw new NotFoundError('user not found')
-      return { id }
-    }
+      if (!ObjectId.isValid(id)) {
+        throw new NotFoundError('user not found')
+      }
+      const user = await db.collection('users').findOne({ _id: new ObjectId(id) })
+      if (!user) {
+        throw new NotFoundError('user not found')
+      }
+      return { id: user._id.toHexString() }
+    },
   }
 
-  let mockStock = 3
+  const productStore = new MongoProductStore(db)
+  const productService = new ProductService(productStore)
 
-  const mockProductCatalog: ProductCatalog = {
+  const productCatalog: ProductCatalog = {
     async getProductById(id: string) {
-      if (!ObjectId.isValid(id)) throw new BadRequestError('invalid product id')
-      if (id === '000000000000000000000001') throw new NotFoundError('product not found')
-      return { id, name: 'Keyboard', price: 159000 }
+      // getById ของเพื่อนจะ throw NotFoundError ให้เองถ้าไม่เจอ
+      const product = await productService.getById(id)
+      return {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+      }
     },
     async decreaseStock(id: string, qty: number) {
-      if (!ObjectId.isValid(id)) throw new BadRequestError('invalid product id')
-      if (mockStock < qty) {throw new ConflictError('insufficient stock')}
-      mockStock -= qty
-    }
+      // decreaseStock ของเพื่อนจะตัด stock ใน MongoDB แบบ atomic และ throw ConflictError ให้ถ้าสต็อกไม่พอ
+      await productService.decreaseStock(id, qty)
+    },
+    async increaseStock(id: string, qty: number) {
+      // สำหรับคืนสต็อก (rollback) ในกรณี insert order ไม่สำเร็จ
+      await db.collection('products').updateOne(
+        { _id: new ObjectId(id) },
+        { $inc: { stock: qty } }
+      )
+    },
   }
 
   app.use('/users', createUsersRouter(db))
   app.use('/products', createProductsRouter(db))
-  app.use('/orders', createOrdersRouter(db, mockUserLookup, mockProductCatalog))
+  app.use('/orders', createOrdersRouter(db, userLookup, productCatalog))
   app.use('/examples', createExampleRouter(db)) // ตัวอย่าง DI — ดู src/module/example
 
   app.use(notFoundHandler)

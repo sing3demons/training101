@@ -23,4 +23,5 @@ export interface UserLookup {
 export interface ProductCatalog {
     getProductById(id: string): Promise<{ id: string; name: string; price: number }>
     decreaseStock(id: string, qty: number): Promise<void>
+    increaseStock(id: string, qty: number): Promise<void>
 }

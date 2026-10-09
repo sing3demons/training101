@@ -3,7 +3,7 @@ import type { Db } from 'mongodb'
 import { OrderHandler } from './orders.handler'
 import { MongoOrderStore } from './orders.repository'
 import { OrderService } from './orders.service'
-import { ProductCatalog, UserLookup } from './orders.model'
+import type { ProductCatalog, UserLookup } from './orders.model'
 
 // รับสิ่งที่ router ต้องใช้เข้ามาทาง parameter แล้วส่งมาจาก app.ts
 // path ข้างในเริ่มจาก '/' เพราะ mount ไว้ที่ /orders แล้ว
