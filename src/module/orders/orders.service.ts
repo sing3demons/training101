@@ -10,18 +10,18 @@ export class OrderService {
     ) {}
 
     async create(input: { userId: string; productId: string; qty: number }): Promise<Order> {
-        // 1. ตรวจสอบว่ามี userId นี้อยู่จริงหรือไม่
+        // ตรวจสอบว่ามี userId นี้อยู่จริงหรือไม่
         await this.userLookup.getUserById(input.userId);
 
-        // 2. ตรวจสอบข้อมูลสินค้าและราคา
+        // ตรวจสอบข้อมูลสินค้าและราคา
         const product = await this.productCatalog.getProductById(input.productId);
         
-        // 3. ลด stock ของสินค้า
+        // ลด stock ของสินค้า
         await this.productCatalog.decreaseStock(input.productId, input.qty);
 
         const total = product.price * input.qty;
 
-        // 4. บันทึก order พร้อมดักจับข้อผิดพลาดเพื่อคืนสต็อก (Rollback)
+        // บันทึก order พร้อมดักจับข้อผิดพลาดเพื่อคืนสต็อก (Rollback)
         try {
             return await this.store.insert({
                 userId: input.userId,
