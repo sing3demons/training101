@@ -1,9 +1,10 @@
 import { Collection, Db, MongoServerError, ObjectId } from "mongodb"
 import { User, NewUser } from "./users.model"
-import { ConflictError } from "../../shared/errors"
+import { ConflictError, BadRequestError } from "../../shared/errors"
 
 export interface UserStore {
     insert(user: NewUser): Promise<User>
+    findById(id: string): Promise<User | null>
 }
 
 // ------ MongoDB ---------
@@ -33,10 +34,20 @@ export class MongoUserStore implements UserStore {
         }
         return toUser(doc)
     }
+
+    async findById(id: string): Promise<User | null> {
+        const doc = await this.collection.findOne({ _id: toObjectId(id) })
+        return doc ? toUser(doc) : null
+    }
 }
 
 function toUser({ _id, ...rest }: UserDocument ): User {
     return { id: _id.toHexString(), ...rest }
+}
+
+function toObjectId(id: string): ObjectId {
+    if (!ObjectId.isValid(id)) throw new BadRequestError('invalid id')
+        return new ObjectId(id)
 }
 
 export async function ensureUserIndexes(db: Db) {

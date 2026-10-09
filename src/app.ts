@@ -3,7 +3,7 @@ import type { Db } from 'mongodb'
 import { ObjectId } from 'mongodb'
 import { errorHandler, notFoundHandler } from './shared/error-handler'
 import { NotFoundError } from './shared/errors'
-import { createUsersRouter } from './module/users/users.routes'
+import { createUserService, createUsersRouter } from './module/users/users.routes'
 import { createProductsRouter } from './module/products/products.routes'
 import { createOrdersRouter } from './module/orders/orders.routes'
 import { createExampleRouter } from './module/example/example.routes'
@@ -60,7 +60,8 @@ export function createApp(db: Db) {
     },
   }
 
-  app.use('/users', createUsersRouter(db))
+  const userService = createUserService(db)
+  app.use('/users', createUsersRouter(userService))
   app.use('/products', createProductsRouter(db))
   app.use('/orders', createOrdersRouter(db, userLookup, productCatalog))
   app.use('/examples', createExampleRouter(db)) // ตัวอย่าง DI — ดู src/module/example

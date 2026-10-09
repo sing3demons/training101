@@ -20,4 +20,9 @@ export class UserHandler {
         const user = await this.userService.create({ name: trimmedName, email: trimmedEmail })
         res.status(201).json({ data: user })
     }
+
+    getById = async (req: Request<{ id: string}>, res: Response) => {
+        const user = await this.userService.getUserById(req.params.id)
+        res.json({ data: user })
+    }
 }
